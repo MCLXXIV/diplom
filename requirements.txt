@@ -1,0 +1,4 @@
+PyQt5==5.15.9
+matplotlib==3.8.2
+vispy==0.14.1
+numpy==1.24.3

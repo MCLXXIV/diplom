@@ -1,0 +1,125 @@
+name: Build Executables
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: Build Windows EXE
+      run: |
+        pyinstaller -y --onefile --windowed `
+          --name="VolumeViewer3D" `
+          --collect-all=vispy `
+          --collect-all=matplotlib `
+          --hidden-import=PyQt5.sip `
+          --hidden-import=matplotlib.backends.backend_qt5agg `
+          --hidden-import=vispy.glsl `
+          --exclude-module=PyQt6 `
+          test.py
+    
+    - name: Copy data folder
+      run: |
+        Copy-Item -Path "data" -Destination "dist/data" -Recurse
+    
+    - name: Upload Windows artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: VolumeViewer3D-Windows
+        path: dist/
+
+  build-macos:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: Build macOS APP
+      run: |
+        pyinstaller -y --onefile --windowed \
+          --name="VolumeViewer3D" \
+          --collect-all=vispy \
+          --collect-all=matplotlib \
+          --hidden-import=PyQt5.sip \
+          --hidden-import=matplotlib.backends.backend_qt5agg \
+          --hidden-import=vispy.glsl \
+          --exclude-module=PyQt6 \
+          test.py
+    
+    - name: Copy data folder
+      run: |
+        cp -r data dist/
+    
+    - name: Upload macOS artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: VolumeViewer3D-macOS
+        path: dist/
+
+  build-linux:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: Build Linux binary
+      run: |
+        pyinstaller -y --onefile --windowed \
+          --name="VolumeViewer3D" \
+          --collect-all=vispy \
+          --collect-all=matplotlib \
+          --hidden-import=PyQt5.sip \
+          --hidden-import=matplotlib.backends.backend_qt5agg \
+          --hidden-import=vispy.glsl \
+          --exclude-module=PyQt6 \
+          test.py
+    
+    - name: Copy data folder
+      run: |
+        cp -r data dist/
+    
+    - name: Upload Linux artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: VolumeViewer3D-Linux
+        path: dist/
